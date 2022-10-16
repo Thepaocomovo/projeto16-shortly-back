@@ -10,11 +10,11 @@ const database = 'shortly';
 
 
 const connection = new Pool({
-    user,
-    password,
-    host,
-    port,
-    database
-  });
+  user,
+  password,
+  host,
+  port,
+  database
+});
 
-  export default connection;
+export default connection;

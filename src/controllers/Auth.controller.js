@@ -2,8 +2,7 @@ import joi from "joi";
 import { stripHtml } from "string-strip-html";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
-import connection from "../database/Postgres.js";
-import * as authRepository from "../repositories/auth.repository.js"
+import * as authRepository from "../repositories/Auth.repository.js"
 
 const newUserSchema = joi.object({
     name: joi.string().required().trim(),
@@ -55,10 +54,9 @@ const registration = async (req, res) => {
     return res.sendStatus(201);
 };
 
-
-
 const login = async (req, res) => {
     const { email, password } = req.body;
+    const token = uuidv4();
 
     if (!email, !password) {
         return res.sendStatus(422);
@@ -85,27 +83,11 @@ const login = async (req, res) => {
         return res.sendStatus(401);
     }
 
-    const token = uuidv4();
-
-    
     if (await authRepository.existentSession(res, registeredUser.id)) {
         return await authRepository.updateTokenSession(res, registeredUser.id, token);
     }
-    
-
-
 
     await authRepository.createSession(res, registeredUser.id, token);
-
-    // try {
-    //     await connection.query(`
-    //     INSERT INTO sessions ("userId", token) 
-    //     VALUES ($1, $2);`, [registeredUser.id, token]
-    //     );
-    // } catch (error) {
-    //     console.log(error);
-    //     return res.sendStatus(500);
-    // }
 
     return res.status(200).send({ token: token });
 }
