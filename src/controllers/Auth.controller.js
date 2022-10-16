@@ -46,32 +46,16 @@ const registration = async (req, res) => {
         password: hashPassword
     }
 
-
-    try {
-        const existentUser = await connection.query(`
-        SELECT * FROM users  
-        WHERE email = $1;`, [newUser.email]
-        );
-        if (existentUser.rows.length) {
-            return res.sendStatus(409);
-        }
-    } catch (error) {
-        console.log(error);
-        return res.sendStatus(500);
+    if (await authRepository.existentUser(res, newUser.email)) {
+        return res.sendStatus(409);
     }
 
-    try {
-        await connection.query(`
-        INSERT INTO users (name, email, password) 
-        VALUES ($1, $2, $3);`, [newUser.name, newUser.email, newUser.password]
-        );
-    } catch (error) {
-        console.log(error);
-        return res.sendStatus(500);
-    }
+    await authRepository.createUser(res, newUser.name, newUser.email, newUser.password);
 
     return res.sendStatus(201);
 };
+
+
 
 const login = async (req, res) => {
     const { email, password } = req.body;
@@ -103,53 +87,27 @@ const login = async (req, res) => {
 
     const token = uuidv4();
 
-    let existentSession;
-
-    try {
-        existentSession = await connection.query(`
-        SELECT * FROM sessions 
-        WHERE "userId" = $1;`, [registeredUser.id]
-        );
-    } catch (error) {
-        console.log(error);
-        return res.sendStatus(501);
+    
+    if (await authRepository.existentSession(res, registeredUser.id)) {
+        return await authRepository.updateTokenSession(res, registeredUser.id, token);
     }
+    
 
 
 
-    if (existentSession.rowCount) {
-        try {
-            await connection.query(`UPDATE sessions SET token = $1;`, [token]);
-            return res.status(200).send({token: token});
-        } catch (error) {
-            console.log(error);
-            return res.sendStatus(500);
-        }
-    }
+    await authRepository.createSession(res, registeredUser.id, token);
 
+    // try {
+    //     await connection.query(`
+    //     INSERT INTO sessions ("userId", token) 
+    //     VALUES ($1, $2);`, [registeredUser.id, token]
+    //     );
+    // } catch (error) {
+    //     console.log(error);
+    //     return res.sendStatus(500);
+    // }
 
-
-    console.log(existentSession.rows)
-    try {
-        await connection.query(`
-        INSERT INTO sessions ("userId", token) 
-        VALUES ($1, $2);`, [registeredUser.id, token]
-        );
-    } catch (error) {
-        console.log(error);
-        return res.sendStatus(500);
-    }
-
-
-
-
-
-
-
-
-
-
-    return res.status(200).send({token: token});
+    return res.status(200).send({ token: token });
 }
 
 
