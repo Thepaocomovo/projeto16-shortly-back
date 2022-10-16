@@ -1,6 +1,5 @@
 import connection from "../database/Postgres.js";
 
-
 const insertNewUrl = async (res, userId, url, shortUrl) => {
     try {
         await connection.query(`
@@ -18,7 +17,7 @@ const selectUrlByID = async (res, id) => {
     let urlQuery;
     try {
         urlQuery = await connection.query(`
-        SELECT id, "shortUrl", url FROM urls 
+        SELECT id, "shortUrl", url, "userId" FROM urls 
         WHERE id = $1 
         ;`, [id]);
 
@@ -27,7 +26,7 @@ const selectUrlByID = async (res, id) => {
         return res.sendStatus(500);
     }
 
-   return urlQuery;
+    return urlQuery;
 }
 
 const selectUrlByShortUrl = async (res, shortUrl) => {
@@ -52,10 +51,17 @@ const incrementVisitCount = async (res, shortUrl, newVisitCounter) => {
         console.log(error);
         return res.sendStatus(500);
     }
-}
-    
-    
+};
 
+const deleteUrlById = async (res, id) => {
+    try {
+        await connection.query(`
+            DELETE FROM urls WHERE id = $1
+        ;`, [id])
+    } catch (error) {
+        console.log(error);
+        return res.sendStatus(500);
+    }
+};
 
-
-export { insertNewUrl, selectUrlByID, selectUrlByShortUrl, incrementVisitCount}
+export { insertNewUrl, selectUrlByID, selectUrlByShortUrl, incrementVisitCount, deleteUrlById };

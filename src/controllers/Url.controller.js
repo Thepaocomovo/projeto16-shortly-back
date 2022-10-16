@@ -9,7 +9,7 @@ const urlSchema = joi.object({
         .required()
         .regex(
             /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/
-        ),
+        )
 });
 
 const shortenUrl = async (req, res) => {
@@ -31,6 +31,7 @@ const shortenUrl = async (req, res) => {
 const getUrlById = async (req, res) => {
     const { id } = req.params
     let urlQuery;
+    let url;
     if (isNaN(Number(id))) {
         return res.sendStatus(404);
     }
@@ -41,24 +42,49 @@ const getUrlById = async (req, res) => {
         return res.sendStatus(404);
     }
 
-    return res.status(200).send(urlQuery.rows[0]);
+    url = urlQuery.rows[0]
+    delete url.userId;
+
+    return res.status(200).send(url);
 };
 
 const openUrl = async (req, res) => {
-    const { shortUrl } = req.params
+    const { shortUrl } = req.params;
 
     const query = await urlRepository.selectUrlByShortUrl(res, shortUrl);
 
-    if(!query.rowCount) {
+    if (!query.rowCount) {
         return res.sendStatus(404);
     }
 
-    const visitCounter = query.rows[0].visitCounter
+    const visitCounter = query.rows[0].visitCounter;
 
-    await urlRepository.incrementVisitCount(res, shortUrl, visitCounter+1 );
+    await urlRepository.incrementVisitCount(res, shortUrl, visitCounter + 1);
 
-    return res.redirect(query.rows[0].url)
+    return res.redirect(query.rows[0].url);
+};
+
+const deleteUrl = async (req, res) => {
+    const userId = res.locals.session.userId;
+    const { id } = req.params;
+    if (isNaN(Number(id))) {
+        return res.sendStatus(404);
+    }
+
+    const urlQuery = await urlRepository.selectUrlByID(res, id)
+
+    if (!urlQuery.rowCount) {
+        return res.sendStatus(404);
+    }
+
+    if (!urlQuery.rows[0].userId === userId) {
+        return res.sendStatus(401);
+    }
+
+    await urlRepository.deleteUrlById(res, id);
+
+    return res.sendStatus(204);
 };
 
 
-export { shortenUrl, getUrlById, openUrl }
+export { shortenUrl, getUrlById, openUrl, deleteUrl }
