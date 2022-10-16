@@ -14,7 +14,7 @@ const urlSchema = joi.object({
 const shortenUrl = async (req, res) => {
     const { userId } = res.locals.session;
     const { url } = req.body;
-    const shortUrl = nanoid(10)
+    const shortUrl = nanoid(8);
 
     const validation = urlSchema.validate({ url }, { abortEarly: false });
 
@@ -36,13 +36,24 @@ const shortenUrl = async (req, res) => {
     return res.status(201).send({ shortUrl })
 };
 
-const getUrlById = (req, res) => {
+const getUrlById = async (req, res) => {
+    const { id } = req.params
 
+    if(isNaN(Number(id)) ){
+        return res.sendStatus(404);
+    }
 
-const {id} = req.params
-console.log(id)
+    const urlQuery = await connection.query(`
+        SELECT id, "shortUrl", url FROM urls 
+        WHERE id = $1 
+        ;`, [id]);
 
+    if(!urlQuery.rowCount){
+        return res.sendStatus(404);
+    }
 
-    return res.sendStatus(200);
+    return res.status(200).send(urlQuery.rows[0]);
 };
+
+
 export { shortenUrl, getUrlById }
