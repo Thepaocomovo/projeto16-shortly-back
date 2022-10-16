@@ -1,6 +1,7 @@
 import joi from "joi";
 import connection from "../database/Postgres.js";
 import { nanoid } from 'nanoid'
+import * as urlRepository from "../repositories/Urls.repository.js";
 
 const urlSchema = joi.object({
     url: joi
@@ -22,33 +23,21 @@ const shortenUrl = async (req, res) => {
         return res.status(422).send(validation.error.message);
     }
 
-    try {
-        await connection.query(`
-    INSERT INTO urls ("userId", url, "shortUrl") 
-    VALUES ($1, $2, $3);
-    ;`, [userId, url, shortUrl])
-
-    } catch (error) {
-        console.log(error);
-        return res.sendStatus(500);
-    }
+    await urlRepository.insertNewUrl(res, userId, url, shortUrl)
 
     return res.status(201).send({ shortUrl })
 };
 
 const getUrlById = async (req, res) => {
     const { id } = req.params
-
-    if(isNaN(Number(id)) ){
+    let urlQuery;
+    if (isNaN(Number(id))) {
         return res.sendStatus(404);
     }
 
-    const urlQuery = await connection.query(`
-        SELECT id, "shortUrl", url FROM urls 
-        WHERE id = $1 
-        ;`, [id]);
+    urlQuery = await urlRepository.selectUrlByID(res, id)
 
-    if(!urlQuery.rowCount){
+    if (!urlQuery.rowCount) {
         return res.sendStatus(404);
     }
 
@@ -56,4 +45,13 @@ const getUrlById = async (req, res) => {
 };
 
 
-export { shortenUrl, getUrlById }
+
+const openUrl = async (req, res) => {
+
+    
+
+
+};
+
+
+export { shortenUrl, getUrlById, openUrl }

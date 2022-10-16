@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.post("/urls/shorten", Authorization, urlController.shortenUrl);
 router.get("/urls/:id", urlController.getUrlById);
-
+router.get("/urls/open/:shortUrl", urlController.openUrl)
 
 export default router;
