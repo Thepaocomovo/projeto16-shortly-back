@@ -1,6 +1,5 @@
 import connection from "../database/Postgres.js";
 
-
 const existentUser = async (res, email) => {
     let existentUser;
     try {
@@ -13,8 +12,8 @@ const existentUser = async (res, email) => {
         return res.sendStatus(500);
     }
 
-    if(existentUser.rowCount) {
-        res.locals.user =  existentUser.rows[0];
+    if (existentUser.rowCount) {
+        res.locals.user = existentUser.rows[0];
     }
 
     return existentUser.rowCount ? true : false;
@@ -45,8 +44,8 @@ const existentSession = async (res, userId) => {
         return res.sendStatus(500);
     }
 
-       if(existentSession.rowCount) {
-        res.locals.session =  existentSession.rows[0];
+    if (existentSession.rowCount) {
+        res.locals.session = existentSession.rows[0];
     }
 
     return existentSession.rowCount ? true : false;
@@ -75,8 +74,6 @@ const createSession = async (res, userId, token) => {
         return res.sendStatus(500);
     }
 }
-
-
 
 
 export { existentUser, createUser, existentSession, updateTokenSession, createSession }
