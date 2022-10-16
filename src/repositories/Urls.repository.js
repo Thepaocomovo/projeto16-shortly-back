@@ -29,9 +29,33 @@ const selectUrlByID = async (res, id) => {
 
    return urlQuery;
 }
+
+const selectUrlByShortUrl = async (res, shortUrl) => {
+    let query;
+    try {
+        query = await connection.query(`
+        SELECT * FROM urls WHERE "shortUrl" = $1 
+       ;`, [shortUrl]);
+    } catch (error) {
+        console.log(error);
+        return res.sendStatus(500);
+    }
+    return query;
+}
+
+const incrementVisitCount = async (res, shortUrl, newVisitCounter) => {
+    try {
+        await connection.query(`
+        UPDATE urls SET "visitCounter" = $1 WHERE "shortUrl" = $2;
+       ;`, [newVisitCounter, shortUrl]);
+    } catch (error) {
+        console.log(error);
+        return res.sendStatus(500);
+    }
+}
     
     
 
 
 
-export { insertNewUrl, selectUrlByID }
+export { insertNewUrl, selectUrlByID, selectUrlByShortUrl, incrementVisitCount}

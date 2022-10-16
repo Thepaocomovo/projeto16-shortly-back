@@ -44,13 +44,20 @@ const getUrlById = async (req, res) => {
     return res.status(200).send(urlQuery.rows[0]);
 };
 
-
-
 const openUrl = async (req, res) => {
+    const { shortUrl } = req.params
 
-    
+    const query = await urlRepository.selectUrlByShortUrl(res, shortUrl);
 
+    if(!query.rowCount) {
+        return res.sendStatus(404);
+    }
 
+    const visitCounter = query.rows[0].visitCounter
+
+    await urlRepository.incrementVisitCount(res, shortUrl, visitCounter+1 );
+
+    return res.redirect(query.rows[0].url)
 };
 
 
