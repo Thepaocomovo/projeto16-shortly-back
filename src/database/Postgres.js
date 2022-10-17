@@ -9,12 +9,11 @@ const port = 5432;
 const database = 'shortly';
 
 
-const connection = new Pool({
-  user,
-  password,
-  host,
-  port,
-  database
-});
+const connection = {
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+      rejectUnauthorized: false
+  }
+};
 
 export default connection;
