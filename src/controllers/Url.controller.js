@@ -1,5 +1,4 @@
 import joi from "joi";
-import connection from "../database/Postgres.js";
 import { nanoid } from 'nanoid'
 import * as urlRepository from "../repositories/Urls.repository.js";
 
@@ -85,6 +84,5 @@ const deleteUrl = async (req, res) => {
 
     return res.sendStatus(204);
 };
-
 
 export { shortenUrl, getUrlById, openUrl, deleteUrl }
