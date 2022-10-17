@@ -14,7 +14,7 @@ const Authorization = async (req, res, next) => {
         return res.sendStatus(401);
     }
     next();
-}
+};
 
 
 export { Authorization }

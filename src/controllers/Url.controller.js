@@ -76,7 +76,7 @@ const deleteUrl = async (req, res) => {
         return res.sendStatus(404);
     }
 
-    if (!urlQuery.rows[0].userId === userId) {
+    if (urlQuery.rows[0].userId !== userId) {
         return res.sendStatus(401);
     }
 
